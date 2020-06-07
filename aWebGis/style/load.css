@@ -1,0 +1,39 @@
+body,html {
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+    overflow:hidden;
+    font-family: 'Open Sans', Helvetica, Arial;
+}
+#main-loading{
+    width: 100%;
+    height: 100%;
+    background-color: #344357;
+    text-align: center;
+    overflow: hidden;
+
+}
+#main-loading .app-name{
+    font: 36px arial;
+    font-weight: bold;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -204px;
+    margin-top: -135px;
+    z-index: 2;
+}
+#main-loading img{
+    position: relative;
+    top: 34%;
+    height: 275px;
+    display: block;
+    margin: auto;
+}
+
+.hvcenter{
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+}
