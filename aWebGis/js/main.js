@@ -2,19 +2,24 @@ var map, tb;
 var dialog;
 //dojo.registerModulePath('js',location.pathname.replace(/\/[^/]*$/, '') + '/js');
 require([
-    "esri/map", "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/FeatureLayer","esri/layers/GraphicsLayer",
+    "esri/map", "esri/dijit/Search", "dojo/query", "esri/tasks/FindTask","esri/tasks/FindParameters","esri/geometry/Point",
+    "esri/dijit/LocateButton","esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/FeatureLayer",
+    "esri/InfoTemplate","esri/layers/GraphicsLayer","esri/dijit/Measurement", "esri/units",
     "dojo/dom", "esri/dijit/OverviewMap",
     "esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleMarkerSymbol","esri/symbols/PictureFillSymbol","esri/symbols/SimpleLineSymbol",
     "esri/symbols/PictureMarkerSymbol","esri/renderers/SimpleRenderer", "esri/graphic", "esri/lang",
     "esri/Color", "dojo/number", "dojo/dom-style",
     "dijit/TooltipDialog", "dijit/popup",
     "esri/toolbars/draw","esri/symbols/CartographicLineSymbol","dojo/on", "esri/dijit/HomeButton",
+    "esri/dijit/Scalebar", "dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
     "dojo/domReady!"
-    ], function(Map, ArcGISTiledMapServiceLayer, FeatureLayer,GraphicsLayer,dom, OverviewMap,SimpleFillSymbol, SimpleMarkerSymbol, PictureFillSymbol,
+    ], function(Map, Search,query,FindTask,FindParameters, Point,LocateButton,ArcGISTiledMapServiceLayer, FeatureLayer,InfoTemplate,GraphicsLayer,
+                Measurement,Units,dom, OverviewMap,SimpleFillSymbol, SimpleMarkerSymbol, PictureFillSymbol,
                 SimpleLineSymbol,PictureMarkerSymbol,SimpleRenderer, Graphic, esriLang,
                 Color, number, domStyle,
-                TooltipDialog, dijitPopup,Draw,CartographicLineSymbol,on,HomeButton
+                TooltipDialog, dijitPopup,Draw,CartographicLineSymbol,on,HomeButton,Scalebar, parser,
                 ){
+    parser.parse();
 
     map = new Map("mapDiv",{
     logo:false,
@@ -27,7 +32,7 @@ require([
     //map.addLayer(layer);
     var basemap = new ArcGISTiledMapServiceLayer("http://cache1.arcgisonline.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer");
     map.addLayer(basemap);
-    var points = new FeatureLayer("http://localhost:6080/arcgis/rest/services/MyMapService/FeatureServer/0",{
+    var points = new FeatureLayer("http://localhost:6080/arcgis/rest/services/ft/FeatureServer/0",{
         mode: FeatureLayer.MODE_SNAPSHOT,
         outFields: ["house_addr","house_rent","house_orie","house_layo", "house_floo","house_re_1","house_re_2","house_id",
             "house_tag", "house_elev","house_park","house_wate","house_elec","house_gas"]
@@ -44,6 +49,37 @@ require([
     //2.启用小部件
     overviewMapDijit.startup();
 
+
+    var t = "<b>${house_addr}</b><hr><b>面积: </b>${house_rent}<br>"
+        + "<b>房租: </b>${house_re_1}<br>"
+        + "<b>布局: </b>${house_layo}、${house_floo}<br>"
+        + "<b>朝向与模式: </b>${house_orie}、${house_re_2}<br>"
+        + "<b>有无电梯、天然气: </b>${house_elev}、${house_gas}<br>"
+        + "<b>有无停车场: </b>${house_park}<br>"
+        + "<b>电、水模式: </b>${house_wate}、${house_elec}<br>"
+        + "<b>标签: </b>${house_tag}<br>"
+        + "<b><a href='https://cd.lianjia.com/zufang/${house_id}.html' target='_blank'>点击查看详细信息</a> </b>";
+
+    var search = new Search({
+        sources: [{
+            featureLayer: new FeatureLayer("http://localhost:6080/arcgis/rest/services/ft/FeatureServer/0", {
+                outFields: ["*"],
+                infoTemplate: new InfoTemplate("信息",t)
+            }),
+            outFields: ["*"],
+            displayField: "house_re_1",
+            suggestionTemplate: "${house_addr}: ${house_rent}",
+            name: "${house_addr}",
+            zoomScale:50000,
+            placeholder: "example: 1200 元/月",
+            enableSuggestions: true,
+            moreResults:true,
+            maxSuggestions:100,
+        }],
+        map: map
+    }, "search");
+    search.startup();
+
     map.infoWindow.resize(245,125);
 
     dialog = new TooltipDialog({
@@ -58,21 +94,11 @@ require([
     map.on("load", function(){
         map.graphics.enableMouseEvents();
         map.graphics.on("mouse-out", closeDialog);
-
     });
 
     //listen for when the onMouseOver event fires on the countiesGraphicsLayer
     //when fired, create a new graphic with the geometry from the event.graphic and add it to the maps graphics layer
     points.on("mouse-over", function(evt){
-        var t = "<b>${house_addr}</b><hr><b>面积: </b>${house_rent}<br>"
-            + "<b>房租: </b>${house_re_1}<br>"
-            + "<b>布局: </b>${house_layo}、${house_floo}<br>"
-            + "<b>朝向与模式: </b>${house_orie}、${house_re_2}<br>"
-            + "<b>有无电梯、天然气: </b>${house_elev}、${house_gas}<br>"
-            + "<b>有无停车场: </b>${house_park}<br>"
-            + "<b>电、水模式: </b>${house_wate}、${house_elec}<br>"
-            + "<b>标签: </b>${house_tag}<br>"
-            + "<b><a href='https://cd.lianjia.com/zufang/${house_id}.html' target='_blank'>点击查看详细信息</a> </b>";
 
         var content = esriLang.substitute(evt.graphic.attributes,t);
         var highlightGraphic = new Graphic(evt.graphic.geometry,highlightSymbol);
@@ -135,7 +161,7 @@ require([
                 return;
             } else if (evt.target.id ==="Delete"){
                 graphicsLayer.clear();
-                tb.activate(tool);
+                // tb.activate(tool);
                 return;
             }
             var tool = evt.target.id.toLowerCase();
@@ -168,4 +194,99 @@ require([
     }, "HomeButton");
     home.startup();
 
+    geoLocate = new LocateButton({
+        map: map
+    }, "LocateButton");
+    geoLocate.startup();
+
+    var scalebar = new Scalebar({
+        map: map,
+        attachTo:"top-right",
+        scalebarUnit: "dual"
+    });
+
+
+    var nameArr=[];//用于存储查询地点名称
+    var shapeArr=[];//用于存储查询shape
+    var areaArr=[];//用于存储面积
+    var graphicsLayer1 = new GraphicsLayer();
+    map.addLayer(graphicsLayer1);
+    on(dom.byId("btnF"), "click", function() {
+        var name=dom.byId("searchInput").value;//获得输入框的值
+        graphicsLayer1.clear();//清空graphics
+        //实例化查询参数
+        var findParams = new FindParameters();
+        findParams.returnGeometry = true;
+        findParams.layerIds = [0];
+        findParams.contains = true;//是否接受模糊查找
+        findParams.searchFields = ["house_re_1","house_addr","house_rent","house_layo"];
+        findParams.searchText = name;
+        //实例化查询对象
+        var findTask = new FindTask("http://localhost:6080/arcgis/rest/services/ft/MapServer");
+        //进行查询
+        findTask.execute(findParams,showFindResult)
+    });
+    on(dom.byId("del"), "click", function(evt) {
+        graphicsLayer1.clear();
+    });
+    function showFindResult(queryResult)
+    {
+        //初始化信息暂存数组
+        nameArr=[];
+        shapeArr=[];
+        areaArr=[];
+        if (queryResult.length === 0) {
+            alert("查询无结果");
+            return;
+        }
+        for (var i = 0; i < queryResult.length; i++) {
+            nameArr[i]=queryResult[i].feature.attributes.house_re_1;
+            shapeArr[i]=queryResult[i].feature.attributes.house_addr;
+            areaArr[i]=queryResult[i].feature.attributes.house_rent;
+            //定义高亮图形的符号
+
+            var pointSymbol = new SimpleMarkerSymbol(//定义点符号
+                SimpleMarkerSymbol.STYLE_CIRCLE, 10,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                    new Color([255,0,0]), 1),
+                new Color([255,0,0]));
+            var outline= new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT,new Color([255, 0, 0]), 1); //定义面的边界线符号
+            var PolygonSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, outline,new Color([0, 255, 0, 1])); //定义面符号
+
+            var graphic ={}; //创建graphic
+            var locationPoint ={};//创建定位点
+            var geometry = queryResult[i].feature.geometry;//获得该图形的形状
+            if(geometry.type ==="polygon"){
+                graphic = new Graphic(geometry, PolygonSymbol);
+                locationPoint=geometry.getCentroid();
+            }
+            else if(geometry.type ==="point"){
+                graphic = new Graphic(geometry, pointSymbol);
+                locationPoint=geometry;
+            }
+            //将图形添加到map中
+            graphicsLayer1.add(graphic);
+            map.centerAndZoom(locationPoint,13);
+        }
+        var html="";
+        for(var i=0;i<nameArr.length;i++){
+            html+="<tr>" +
+                " <td >"+nameArr[i]+"</td>" +
+                "<td >"+shapeArr[i]+"</td>" +
+                "<td >"+areaArr[i]+"</td>"+
+                "</tr>";
+        }
+        dom.byId("infoBody").innerHTML =html;
+    }
+
+    var measurement = new Measurement({
+        map: map,
+        defaultAreaUnit: Units.SQUARE_KILOMETERS,
+        defaultLengthUnit: Units.KILOMETERS
+    }, dom.byId("measurementDiv"));
+    measurement.startup();
+
+    on(dom.byId("Mea"), "click", function() {
+        dom.byId("measurementDiv").style.display = dom.byId("measurementDiv").style.display == "block"?"none":"block";
+    });
 });

@@ -8,19 +8,20 @@ html, body, #mapDiv{
         float: left;
     }
     #info {
-        top: 20px;
-        color: #444;
-        height: auto;
-        font-family: Arial;
-        right: 20px;
-        margin: 5px;
-        padding: 10px;
-        position: absolute;
-        width: 115px;
-        z-index: 40;
-        border: solid 2px #666;
-        border-radius: 4px;
-        background-color: rgba(255, 255, 255, 0.49);
+            display: none;
+            top: 40px;
+            color: #444;
+            height: auto;
+            font-family: Arial;
+            right: 20px;
+            margin: 5px;
+            padding: 10px;
+            position: absolute;
+            width: 115px;
+            z-index: 40;
+            border: solid 2px #666;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.49);
     }
 
     button {
@@ -31,4 +32,112 @@ html, body, #mapDiv{
         top: 95px;
         left: 20px;
         z-index: 50;
+    }
+    #LocateButton {
+        position: absolute;
+        top: 135px;
+        left: 20px;
+        z-index: 50;
+    }
+    #open{
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        color: #444;
+        font-family: Arial;
+        width:60px;
+        height:30px;
+        border: solid 2px #666;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.49);
+    }
+
+    .login-button { /* 按钮美化 */
+        width: 115px; /* 宽度 */
+        height: 30px; /* 高度 */
+        border-width: 0px; /* 边框宽度 */
+        border-radius: 3px; /* 边框半径 */
+        background: #1E90FF; /* 背景颜色 */
+        cursor: pointer; /* 鼠标移入按钮范围时出现手势 */
+        outline: none; /* 不显示轮廓线 */
+        font-family: Microsoft YaHei; /* 设置字体 */
+        color: white; /* 字体颜色 */
+        font-size: 13px; /* 字体大小 */
+    }
+    .login-button:hover { /* 鼠标移入按钮范围时改变颜色 */
+        background: #5599FF;
+    }
+
+    #search {
+        display: block;
+        position: absolute;
+        z-index: 2;
+        top: 20px;
+        left: 74px;
+    }
+    #Find{
+        display: none;
+        top: 40px;
+        color: #444;
+        height: 300px;
+        font-family: Arial;
+        right: 100px;
+        margin: 5px;
+        padding: 10px;
+        position: absolute;
+        width: auto;
+        overflow:auto;
+        z-index: 40;
+        border: solid 2px #666;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.49);
+    }
+    #Fin{
+        position: absolute;
+        top: 90px;
+        right: 10px;
+        color: #444;
+        font-family: Arial;
+        width:60px;
+        height:30px;
+        border: solid 2px #666;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.49);
+    }
+    table{
+        margin-top: 10px;
+        border-collapse: collapse;
+        overflow-y: scroll;
+    }
+    th,td{
+        padding: 0px;
+        border:1px solid #000;
+    }
+    #measurementDiv{
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        margin-top:10px;
+        border-radius: 5px;
+        width: 278px;
+        height: auto;
+        padding:10px;
+        margin-left:50px;
+        right: 106px;
+        top:57px;
+        display:none;
+        z-index:100;
+    }
+
+    #Mea{
+        position: absolute;
+        top: 130px;
+        right: 10px;
+        color: #444;
+        font-family: Arial;
+        width:60px;
+        height:30px;
+        border: solid 2px #666;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.49);
     }
